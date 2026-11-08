@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>YOUTUBE PRO</title>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      :root {
+        --verified: #3ea6ff; /* verified belgisi rangi — shu yerni o'zgartiring */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #0f0f0f;
+        color: #eee;
+        font: 15px Arial;
+      }
+      .top {
+        height: 64px;
+        position: sticky;
+        top: 0;
+        background: #111;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 0 22px;
+        border-bottom: 1px solid #292929;
+        z-index: 2;
+      }
+      .logo {
+        font-size: 21px;
+        font-weight: bold;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .logo i {
+        color: #f03;
+        font-size: 28px;
+      }
+      .logo b {
+        color: #f03;
+      }
+      .search {
+        display: flex;
+        flex: 1;
+        max-width: 650px;
+        margin: auto;
+      }
+      .search input {
+        flex: 1;
+        min-width: 50px;
+        padding: 12px 16px;
+        background: #181818;
+        border: 1px solid #444;
+        border-radius: 24px 0 0 24px;
+        color: white;
+      }
+      .search button {
+        border-radius: 0 24px 24px 0;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 205px 1fr;
+        min-height: calc(100vh - 64px);
+      }
+      aside {
+        padding: 15px;
+        border-right: 1px solid #292929;
+      }
+      .nav,
+      button {
+        background: #272727;
+        color: white;
+        border: 0;
+        padding: 11px 16px;
+        border-radius: 22px;
+        cursor: pointer;
+      }
+      .nav {
+        display: block;
+        width: 100%;
+        text-align: left;
+        margin: 5px 0;
+        background: transparent;
+        border-radius: 10px;
+      }
+      .nav:hover,
+      .nav.active,
+      button:hover {
+        background: #414141;
+      }
+      .primary {
+        background: #f03;
+      }
+      .content {
+        padding: 24px;
+      }
+      .chips {
+        display: flex;
+        gap: 9px;
+        overflow: auto;
+        margin-bottom: 22px;
+      }
+      .chips button {
+        white-space: nowrap;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+        gap: 22px 15px;
+      }
+      .tile {
+        cursor: pointer;
+      }
+      .thumb {
+        aspect-ratio: 16/9;
+        background: #252525;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .thumb video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .tile h3 {
+        font-size: 15px;
+        line-height: 1.4;
+      }
+      .muted {
+        color: #aaa;
+        font-size: 13px;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: #000c;
+        z-index: 5;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      .box {
+        background: #202020;
+        padding: 24px;
+        border-radius: 16px;
+        width: min(500px, 100%);
+        max-height: 90vh;
+        overflow: auto;
+      }
+      .field {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0 14px;
+        background: #111;
+        border: 1px solid #444;
+        border-radius: 8px;
+        color: white;
+      }
+      .watch {
+        max-width: 1000px;
+        margin: auto;
+      }
+      .watch video {
+        width: 100%;
+        max-height: 65vh;
+        background: black;
+        border-radius: 12px;
+      }
+      .comment {
+        border-bottom: 1px solid #333;
+        padding: 12px 0;
+      }
+      .vb {
+        width: 15px;
+        height: 15px;
+        vertical-align: -2px;
+        margin-left: 5px;
+      }
+      .stats {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .stat {
+        background: #242424;
+        padding: 20px;
+        border-radius: 12px;
+      }
+      .empty {
+        text-align: center;
+        padding: 65px 15px;
+        color: #aaa;
+      }
+      @media (max-width: 700px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          display: flex;
+          overflow: auto;
+          padding: 5px;
+        }
+        .nav {
+          white-space: nowrap;
+          width: auto;
+        }
+        .content {
+          padding: 13px;
+        }
+        .top {
+          padding: 0 8px;
+          gap: 7px;
+        }
+        .logo {
+          font-size: 16px;
+        }
+        .logo i {
+          font-size: 22px;
+        }
+        .grid {
+          grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="logo">
+        <i class="fa-brands fa-youtube"></i>
+        <span><b>𝙂𝙊</b>𝙏𝙐𝘽𝙀</span>
+      </div>
+      <div class="search">
+        <input
+          id="q"
+          placeholder="Qidirish..."
+          onkeydown="if (event.key === 'Enter') home();"
+        /><button onclick="home()">⌕</button>
+      </div>
+      <button onclick="uploadOpen()">＋ Yuklash</button
+      ><a
+        id="adminLink"
+        href="admin.html"
+        style="display: none; background: #ff1f3d; color: #fff; padding: 11px 16px; border-radius: 22px; text-decoration: none; white-space: nowrap;"
+        >⚙ Admin</a
+      ><button id="account" onclick="accountClick()">Kirish</button>
+    </header>
+    <div class="layout">
+      <aside>
+        <button class="nav" onclick="home()">⌂　Bosh sahifa</button
+        ><button class="nav" onclick="library()">▤　Tarix</button
+        ><button class="nav" onclick="studio()">▣　Creator Studio</button
+        ><button class="nav" onclick="myChannel()">◉　Mening kanalim</button>
+      </aside>
+      <main class="content">
+        <div id="chips" class="chips"></div>
+        <div id="main"><div class="empty">Yuklanmoqda...</div></div>
+      </main>
+    </div>
+    <div class="modal" id="auth">
+      <div class="box">
+        <button style="float: right" onclick="closeM('auth')">✕</button>
+        <h2 id="authTitle">Kirish</h2>
+        <input class="field" id="username" placeholder="Username" /><input
+          class="field"
+          id="channelName"
+          placeholder="Kanal nomi"
+        /><input
+          class="field"
+          id="password"
+          type="password"
+          placeholder="Parol (kamida 8 belgi)"
+        /><button class="primary" onclick="authSubmit()">Davom etish</button>
+        <button onclick="toggleRegister()">Ro‘yxatdan o‘tish</button>
+        <p id="authMsg" class="muted"></p>
+      </div>
+    </div>
+    <div class="modal" id="upload">
+      <div class="box">
+        <button style="float: right" onclick="closeM('upload')">✕</button>
+        <h2>Video yuklash</h2>
+        <form id="uploadForm">
+          <input
+            class="field"
+            name="title"
+            placeholder="Video nomi"
+            required
+          /><textarea
+            class="field"
+            name="description"
+            placeholder="Tavsif"
+          ></textarea
+          ><select class="field" name="category">
+            <option>O‘yinlar</option>
+            <option>Ta’lim</option>
+            <option>Musiqa</option>
+            <option>Sport</option>
+            <option>Ko‘ngilochar</option>
+            <option>Texnologiya</option>
+            <option>Boshqa</option></select
+          ><input
+            class="field"
+            type="file"
+            name="video"
+            accept="video/*"
+            required
+          /><button class="primary">Videoni yuklash</button>
+          <p id="uploadMsg" class="muted"></p>
+        </form>
+      </div>
+    </div>
+    <script>
+      let token = localStorage.yp_token || "",
+        me = null,
+        reg = false,
+        cat = "Barchasi";
+      const $ = (x) => document.querySelector(x),
+        cats = [
+          "Barchasi",
+          "O‘yinlar",
+          "Ta’lim",
+          "Musiqa",
+          "Sport",
+          "Ko‘ngilochar",
+          "Texnologiya",
+          "Boshqa",
+        ];
+      async function api(url, opt = {}) {
+        opt.headers = {
+          ...(opt.headers || {}),
+          ...(token ? { Authorization: "Bearer " + token } : {}),
+        };
+        if (opt.body && !(opt.body instanceof FormData))
+          opt.headers["Content-Type"] = "application/json";
+        let r = await fetch("/api" + url, opt),
+          d = await r.json().catch(() => ({}));
+        if (!r.ok) throw Error(d.error || "Xatolik");
+        return d;
+      }
+      function esc(s = "") {
+        return String(s).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      const VERIFIED =
+        '<svg class="vb" viewBox="0 0 24 24" title="Tasdiqlangan kanal"><circle cx="12" cy="12" r="11" style="fill:var(--verified)"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const vb = (o) => (o && o.verified ? VERIFIED : "");
+      function modal(id) {
+        $("#" + id).style.display = "flex";
+      }
+      function closeM(id) {
+        $("#" + id).style.display = "none";
+      }
+      async function refresh() {
+        if (token)
+          try {
+            me = await api("/me");
+          } catch {
+            token = "";
+            localStorage.removeItem("yp_token");
+          }
+        $("#account").textContent = me ? me.username : "Kirish";
+        $("#adminLink").style.display = me && me.isAdmin ? "inline-block" : "none";
+      }
+      function accountClick() {
+        if (me) {
+          if (confirm("Akkauntdan chiqilsinmi?")) {
+            token = "";
+            me = null;
+            localStorage.removeItem("yp_token");
+            refresh();
+            home();
+          }
+        } else {
+          reg = false;
+          $("#authTitle").textContent = "Kirish";
+          modal("auth");
+        }
+      }
+      function toggleRegister() {
+        reg = !reg;
+        $("#authTitle").textContent = reg ? "Ro‘yxatdan o‘tish" : "Kirish";
+        $("#channelName").style.display = reg ? "block" : "none";
+      }
+      async function authSubmit() {
+        try {
+          let d = await api(reg ? "/register" : "/login", {
+            method: "POST",
+            body: JSON.stringify({
+              username: $("#username").value,
+              password: $("#password").value,
+              channelName: $("#channelName").value,
+            }),
+          });
+          token = d.token;
+          localStorage.yp_token = token;
+          me = d.user;
+          refresh();
+          closeM("auth");
+          home();
+        } catch (e) {
+          $("#authMsg").textContent = e.message;
+        }
+      }
+      function chips() {
+        $("#chips").innerHTML = cats
+          .map(
+            (c) =>
+              `<button onclick="cat='${c}';home()" style="${cat === c ? "background:white;color:black" : ""}">${c}</button>`,
+          )
+          .join("");
+      }
+      function tile(v) {
+        return `<div class="tile" onclick="watch('${v.id}')"><div class="thumb"><video src="${v.url}" muted preload="metadata"></video></div><h3>${esc(v.title)}</h3><div class="muted">${esc(v.owner?.channelName || "Kanal")}${vb(v.owner)}<br>${v.views || 0} marta ko‘rildi · ${new Date(v.createdAt).toLocaleDateString()}</div></div>`;
+      }
+      async function home() {
+        chips();
+        try {
+          let vs = await api(
+            "/videos?q=" +
+              encodeURIComponent($("#q").value) +
+              "&category=" +
+              encodeURIComponent(cat),
+          );
+          $("#main").innerHTML = vs.length
+            ? '<div class="grid">' + vs.map(tile).join("") + "</div>"
+            : '<div class="empty">Hali video yo‘q. Birinchi videoni yuklang!</div>';
+        } catch (e) {
+          $("#main").textContent = e.message;
+        }
+      }
+      async function watch(id) {
+        try {
+          let v = await api("/videos/" + id),
+            comments = await api("/videos/" + id + "/comments");
+          $("#chips").innerHTML = "";
+          $("#main").innerHTML =
+            `<div class="watch"><video src="${v.url}" controls autoplay></video><h2>${esc(v.title)}</h2><p class="muted">${esc(v.owner.channelName)}${vb(v.owner)} · ${v.views} ko‘rish</p><button onclick="like('${id}')">👍 ${v.likeCount} Like</button> <button onclick="channel('${v.userId}')">Kanal</button><p>${esc(v.description)}</p><h3>Izohlar</h3><div style="display:flex;gap:8px"><input class="field" id="comment" placeholder="Izoh yozing..." style="flex:1"><button onclick="comment('${id}')">Yuborish</button></div><div id="comments">${comments.map((c) => `<div class="comment"><b>${esc(c.user.channelName)}</b>${vb(c.user)}<p>${esc(c.body)}</p></div>`).join("")}</div></div>`;
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      async function like(id) {
+        if (!me) return alert("Avval kiring");
+        await api("/videos/" + id + "/like", { method: "POST" });
+        watch(id);
+      }
+      async function comment(id) {
+        if (!me) return alert("Avval kiring");
+        try {
+          await api("/videos/" + id + "/comments", {
+            method: "POST",
+            body: JSON.stringify({ body: $("#comment").value }),
+          });
+          watch(id);
+        } catch (e) {
+          alert(e.message);
+        }
+      }
+      function uploadOpen() {
+        if (!me) return accountClick();
+        modal("upload");
+      }
+      $("#uploadForm").onsubmit = async (e) => {
+        e.preventDefault();
+        $("#uploadMsg").textContent = "Yuklanmoqda...";
+        try {
+          await api("/videos", {
+            method: "POST",
+            body: new FormData(e.target),
+          });
+          $("#uploadMsg").textContent = "Video yuklandi!";
+          e.target.reset();
+          setTimeout(() => {
+            closeM("upload");
+            home();
+          }, 700);
+        } catch (err) {
+          $("#uploadMsg").textContent = err.message;
+        }
+      };
+      async function channel(id) {
+        let d = await api("/channels/" + id);
+        $("#chips").innerHTML = "";
+        $("#main").innerHTML =
+          `<h1>${esc(d.user.channelName)}${vb(d.user)}</h1><p class="muted">@${esc(d.user.username)} · ${d.subscribers} obunachi</p><button class="primary" onclick="subscribe('${id}')">Obuna bo‘lish / bekor qilish</button><h2>Videolar</h2><div class="grid">${d.videos.map(tile).join("")}</div>`;
+      }
+      async function subscribe(id) {
+        if (!me) return accountClick();
+        await api("/channels/" + id + "/subscribe", { method: "POST" });
+        channel(id);
+      }
+      function myChannel() {
+        if (!me) return accountClick();
+        channel(me.id);
+      }
+      async function studio() {
+        if (!me) return accountClick();
+        let d = await api("/studio");
+        $("#chips").innerHTML = "";
+        $("#main").innerHTML =
+          `<h1>Creator Studio</h1><div class="stats"><div class="stat">Ko‘rishlar<h2>${d.views}</h2></div><div class="stat">Obunachilar<h2>${d.subscribers}</h2></div><div class="stat">Videolar<h2>${d.videos.length}</h2></div></div><h2>Videolaringiz</h2><div class="grid">${d.videos.map(tile).join("")}</div>`;
+      }
+      async function library() {
+        if (!me) return accountClick();
+        let d = await api("/library");
+        $("#chips").innerHTML = "";
+        $("#main").innerHTML =
+          '<h2>Ko‘rish tarixi</h2><div class="grid">' +
+          d.history.map(tile).join("") +
+          "</div>";
+      }
+      // Online holatni bildirish: har 30 soniyada serverga "men shu yerdaman" deb yuboradi
+      function ping() {
+        if (token && !document.hidden)
+          api("/ping", { method: "POST" }).catch(() => {});
+      }
+      setInterval(ping, 30000);
+      document.addEventListener("visibilitychange", ping);
+
+      (async () => {
+        await refresh();
+        ping();
+        home();
+      })();
+    </script>
+  </body>
+</html>

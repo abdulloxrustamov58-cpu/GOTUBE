@@ -1,0 +1,57 @@
+{
+  "users": [
+    {
+      "id": "99b55ba8-74c0-402d-a223-04fb2ab22edd",
+      "username": "abdullox_rustamov",
+      "channelName": "MrBeast",
+      "about": "",
+      "password": "$2a$12$tpGg5n9N6ZqpEAgRUcfi8eidhS5CLO60EWK..ZVANI2A2KXkfKUZu",
+      "rank": "boost"
+    },
+    {
+      "id": "c43be2cc-4fa6-414e-8e7c-2c4c138b9360",
+      "username": "mrbeast",
+      "channelName": "MrBeast",
+      "about": "",
+      "password": "$2a$12$9UVxD1AVKohXz/Gkx/JAEecOL45jLtwwdA1BcVnuy/J4YhNX/J5Xa",
+      "lastSeenAt": 1794154528727,
+      "verified": true
+    }
+  ],
+  "videos": [
+    {
+      "id": "b3851cad-5a4c-43c4-87bd-522915e7fec5",
+      "userId": "99b55ba8-74c0-402d-a223-04fb2ab22edd",
+      "title": "Hello my one video",
+      "description": "Hello guy's!",
+      "category": "Boshqa",
+      "url": "/uploads/1794148287724-a2932dce66.mp4",
+      "filename": "1794148287724-a2932dce66.mp4",
+      "views": 4,
+      "createdAt": "2026-11-08T14:31:27.774Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": "ac7110f8-1e00-4a2b-af58-0d5838e890b1",
+      "videoId": "b3851cad-5a4c-43c4-87bd-522915e7fec5",
+      "userId": "99b55ba8-74c0-402d-a223-04fb2ab22edd",
+      "body": "Waww!!!",
+      "createdAt": "2026-11-08T15:04:54.536Z"
+    }
+  ],
+  "likes": [
+    {
+      "userId": "99b55ba8-74c0-402d-a223-04fb2ab22edd",
+      "videoId": "b3851cad-5a4c-43c4-87bd-522915e7fec5"
+    }
+  ],
+  "subscriptions": [],
+  "history": [
+    {
+      "userId": "99b55ba8-74c0-402d-a223-04fb2ab22edd",
+      "videoId": "b3851cad-5a4c-43c4-87bd-522915e7fec5"
+    }
+  ],
+  "saved": []
+}

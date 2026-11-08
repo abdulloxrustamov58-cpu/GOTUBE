@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GoTube · Admin panel</title>
+    <link rel="icon" type="image/svg+xml" href="gotube-icon.svg" />
+    <style>
+      :root {
+        --verified: #ff0000; /* verified belgisi rangi — shu yerni o'zgartiring */
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #0f0f0f; color: #eee; font: 15px Arial, sans-serif; }
+      a { color: inherit; text-decoration: none; }
+      .top {
+        height: 64px; position: sticky; top: 0; z-index: 2;
+        background: #111; border-bottom: 1px solid #292929;
+        display: flex; align-items: center; gap: 14px; padding: 0 22px;
+      }
+      .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: bold; white-space: nowrap; }
+      .brand img { height: 34px; }
+      .brand small { color: #ff1f3d; font-size: 13px; border: 1px solid #ff1f3d; padding: 2px 8px; border-radius: 12px; }
+      .spacer { flex: 1; }
+      button, .btn {
+        background: #272727; color: #fff; border: 0; padding: 10px 16px;
+        border-radius: 20px; cursor: pointer; font: inherit; white-space: nowrap;
+      }
+      button:hover, .btn:hover { background: #414141; }
+      .primary { background: #ff1f3d; }
+      .primary:hover { background: #e0102d; }
+      .danger { background: #3a1218; color: #ff6b81; }
+      .danger:hover { background: #55151f; }
+      .small { padding: 6px 12px; font-size: 13px; }
+      .wrap { max-width: 1250px; margin: auto; padding: 22px; }
+      .tabs { display: flex; gap: 8px; margin-bottom: 20px; overflow: auto; }
+      .tabs button.active { background: #fff; color: #000; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 26px; }
+      .card { background: #1c1c1c; border: 1px solid #292929; border-radius: 14px; padding: 18px; }
+      .card .label { color: #aaa; font-size: 13px; }
+      .card .num { font-size: 32px; font-weight: bold; margin-top: 6px; }
+      .card.green .num { color: #3ddc84; }
+      .card.red .num { color: #ff6b81; }
+      .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+      .toolbar input {
+        flex: 1; min-width: 180px; max-width: 360px; padding: 11px 16px;
+        background: #181818; border: 1px solid #444; border-radius: 22px; color: #fff; font: inherit;
+      }
+      .chip.active { background: #fff; color: #000; }
+      .tablebox { background: #1c1c1c; border: 1px solid #292929; border-radius: 14px; overflow: auto; }
+      table { width: 100%; border-collapse: collapse; min-width: 760px; }
+      th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #292929; vertical-align: middle; }
+      th { color: #aaa; font-weight: normal; font-size: 13px; background: #181818; position: sticky; top: 0; }
+      tr:last-child td { border-bottom: 0; }
+      tr:hover td { background: #212121; }
+      .user { display: flex; align-items: center; gap: 12px; }
+      .avatar {
+        width: 38px; height: 38px; border-radius: 50%; background: #ff1f3d; color: #fff;
+        display: flex; align-items: center; justify-content: center; font-weight: bold; flex: none;
+      }
+      .muted { color: #aaa; font-size: 13px; }
+      .badge { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; padding: 4px 10px; border-radius: 14px; background: #242424; }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: #666; }
+      .on .dot { background: #3ddc84; box-shadow: 0 0 8px #3ddc84; }
+      .on { color: #3ddc84; background: #12301f; }
+      .banned { color: #ff6b81; background: #3a1218; }
+      .actions { display: flex; gap: 6px; }
+      .empty { text-align: center; padding: 50px 15px; color: #aaa; }
+      .vb { width: 16px; height: 16px; vertical-align: -3px; margin-left: 5px; }
+      button:disabled { opacity: .4; cursor: not-allowed; }
+      .rankgrp { display: inline-flex; gap: 2px; background: #242424; border-radius: 20px; padding: 2px; }
+      .rankgrp button { background: transparent; }
+      .rankgrp button.cur { background: #fff; color: #000; }
+      .rankgrp button.cur.boost { background: #ffd166; }
+      .rankgrp button.cur.demote { background: #ff6b81; }
+      .colactions { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+      .center { max-width: 420px; margin: 90px auto; text-align: center; }
+      #toast {
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background: #272727; padding: 12px 20px; border-radius: 12px; display: none; z-index: 9;
+      }
+      .live { color: #3ddc84; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+      @media (max-width: 700px) {
+        .top { padding: 0 10px; }
+        .wrap { padding: 12px; }
+        .brand { font-size: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <img src="gotube-icon.svg" alt="GoTube" />
+        <span>GoTube</span><small>ADMIN</small>
+      </div>
+      <div class="spacer"></div>
+      <div class="live" id="live"><span class="dot" style="background:#3ddc84"></span> Jonli</div>
+      <button onclick="load()">⟳ Yangilash</button>
+      <a class="btn" href="index.html">← Saytga qaytish</a>
+    </header>
+
+    <div class="wrap" id="app">
+      <div class="empty">Yuklanmoqda...</div>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+      const token = localStorage.yp_token || "";
+      const $ = (x) => document.querySelector(x);
+      let tab = "dash", filter = "all", query = "";
+      let users = [], videos = [], timer = null, ready = false;
+
+      async function api(url, opt = {}) {
+        opt.headers = { ...(opt.headers || {}), Authorization: "Bearer " + token };
+        if (opt.body) opt.headers["Content-Type"] = "application/json";
+        const r = await fetch("/api/admin" + url, opt);
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          const e = Error(d.error || "Xatolik");
+          e.status = r.status;
+          throw e;
+        }
+        return d;
+      }
+      function esc(s = "") {
+        return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+      }
+      function toast(t) {
+        const el = $("#toast");
+        el.textContent = t;
+        el.style.display = "block";
+        clearTimeout(toast.t);
+        toast.t = setTimeout(() => (el.style.display = "none"), 2500);
+      }
+      function ago(ts) {
+        if (!ts) return "hech qachon";
+        const s = Math.max(0, (Date.now() - new Date(ts).getTime()) / 1000);
+        if (s < 60) return "hozirgina";
+        if (s < 3600) return Math.floor(s / 60) + " daqiqa oldin";
+        if (s < 86400) return Math.floor(s / 3600) + " soat oldin";
+        return Math.floor(s / 86400) + " kun oldin";
+      }
+      const fmtDate = (d) => (d ? new Date(d).toLocaleDateString() : "—");
+      const num = (n) => Number(n || 0).toLocaleString();
+      const LIMIT = 1000; // verified uchun minimal obunachilar soni
+      const VERIFIED = '<svg class="vb" viewBox="0 0 24 24" title="Verified"><circle cx="12" cy="12" r="11" style="fill:var(--verified)"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      function rankTag(u) {
+        if (u.rank === "boost") return ' <span class="badge" style="padding:1px 8px;color:#ffd166">⭐ Tavsiyada</span>';
+        if (u.rank === "demote") return ' <span class="badge banned" style="padding:1px 8px">⬇ Cho‘kkan</span>';
+        return "";
+      }
+      function adminActions(u) {
+        const id = esc(u.id);
+        return u.verified
+          ? `<button class="small" data-a="verify" data-id="${id}" data-v="0">Badge‘ni olib tashlash</button>`
+          : `<button class="small primary" data-a="verify" data-id="${id}" data-v="1">✔ Rasmiy kanal (verified)</button>`;
+      }
+      function channelActions(u) {
+        const id = esc(u.id), rank = u.rank || "normal", ok = (u.subscribers || 0) >= LIMIT;
+        const verify = u.verified
+          ? `<button class="small" data-a="verify" data-id="${id}" data-v="0">Badge‘ni olib tashlash</button>`
+          : `<button class="small ${ok ? "primary" : ""}" data-a="verify" data-id="${id}" data-v="1" ${ok ? "" : 'disabled title="Verified uchun kamida 1000 obunachi kerak"'}>✔ Verified berish</button>`;
+        const ranks = [["boost", "⭐ Tavsiya"], ["normal", "Oddiy"], ["demote", "⬇ Cho‘ktirish"]]
+          .map(([r, l]) => `<button class="small ${rank === r ? "cur " + r : ""}" data-a="rank" data-id="${id}" data-r="${r}">${l}</button>`).join("");
+        return `<div class="colactions">
+          <div class="actions">${verify}</div>
+          <div class="rankgrp">${ranks}</div>
+          <div class="actions">
+            <button class="small" data-a="ban" data-id="${id}" data-b="${u.banned ? 0 : 1}">${u.banned ? "Blokdan chiqarish" : "Bloklash"}</button>
+            <button class="small danger" data-a="deluser" data-id="${id}">O‘chirish</button>
+          </div></div>`;
+      }
+
+      function denied(msg) {
+        clearInterval(timer);
+        $("#app").innerHTML = `<div class="center"><h2>🔒 Ruxsat yo‘q</h2><p class="muted">${esc(msg)}</p><a class="btn primary" href="index.html">Saytga qaytish</a></div>`;
+      }
+
+      async function load() {
+        try {
+          [users, videos] = await Promise.all([api("/users"), api("/videos")]);
+          ready = true;
+          draw();
+        } catch (e) {
+          if (e.status === 401) return denied("Avval saytga admin akkaunt bilan kiring.");
+          if (e.status === 403) return denied("Bu sahifa faqat adminlar uchun.");
+          if (!ready) return denied(e.message);
+          $("#live").innerHTML = '<span class="dot" style="background:#ff6b81"></span> Aloqa uzildi';
+        }
+      }
+
+      function shell() {
+        if ($("#view")) return;
+        $("#app").innerHTML = `
+          <div class="tabs" id="tabs">
+            <button data-t="dash">📊 Umumiy</button>
+            <button data-t="users">👥 Foydalanuvchilar</button>
+            <button data-t="videos">🎬 Videolar</button>
+          </div>
+          <div class="toolbar" id="toolbar" style="display:none">
+            <input id="search" placeholder="Qidirish..." />
+            <span id="filters">
+              <button class="chip" data-f="all">Hammasi</button>
+              <button class="chip" data-f="online">🟢 Online</button>
+              <button class="chip" data-f="offline">⚪ Offline</button>
+              <button class="chip" data-f="banned">⛔ Bloklangan</button>
+              <button class="chip" data-f="verified">✔ Verified</button>
+              <button class="chip" data-f="eligible">🏅 1000+ obunachi</button>
+              <button class="chip" data-f="boost">⭐ Tavsiyada</button>
+              <button class="chip" data-f="demote">⬇ Cho‘kkan</button>
+            </span>
+          </div>
+          <div id="view"></div>`;
+        $("#tabs").onclick = (e) => {
+          const t = e.target.closest("[data-t]");
+          if (!t) return;
+          tab = t.dataset.t;
+          query = "";
+          $("#search").value = "";
+          draw();
+        };
+        $("#filters").onclick = (e) => {
+          const f = e.target.closest("[data-f]");
+          if (!f) return;
+          filter = f.dataset.f;
+          draw();
+        };
+        $("#search").oninput = (e) => {
+          query = e.target.value.toLowerCase();
+          draw();
+        };
+        $("#view").onclick = onAction;
+      }
+
+      function draw() {
+        shell();
+        $("#live").innerHTML = '<span class="dot" style="background:#3ddc84"></span> Jonli';
+        document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("active", b.dataset.t === tab));
+        document.querySelectorAll("#filters button").forEach((b) => b.classList.toggle("active", b.dataset.f === filter));
+        $("#toolbar").style.display = tab === "dash" ? "none" : "flex";
+        $("#filters").style.display = tab === "users" ? "inline" : "none";
+        if (tab === "dash") drawDash();
+        else if (tab === "users") drawUsers();
+        else drawVideos();
+      }
+
+      function drawDash() {
+        const online = users.filter((u) => u.online).length;
+        const banned = users.filter((u) => u.banned).length;
+        const views = videos.reduce((a, v) => a + (v.views || 0), 0);
+        const likes = videos.reduce((a, v) => a + (v.likeCount || 0), 0);
+        const today = users.filter((u) => u.createdAt && new Date(u.createdAt).toDateString() === new Date().toDateString()).length;
+        const verifiedN = users.filter((u) => u.verified).length;
+        const eligible = users.filter((u) => (u.subscribers || 0) >= LIMIT && !u.verified && !u.banned).sort((a, b) => (b.subscribers || 0) - (a.subscribers || 0));
+        const boosted = users.filter((u) => u.rank === "boost").length;
+        const demoted = users.filter((u) => u.rank === "demote").length;
+        const recent = [...users].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+        const topVideos = [...videos].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+        $("#view").innerHTML = `
+          <div class="cards">
+            <div class="card"><div class="label">Jami foydalanuvchilar</div><div class="num">${num(users.length)}</div></div>
+            <div class="card green"><div class="label">🟢 Hozir online</div><div class="num">${num(online)}</div></div>
+            <div class="card"><div class="label">⚪ Offline</div><div class="num">${num(users.length - online)}</div></div>
+            <div class="card red"><div class="label">⛔ Bloklanganlar</div><div class="num">${num(banned)}</div></div>
+            <div class="card"><div class="label">Bugun qo‘shilganlar</div><div class="num">${num(today)}</div></div>
+            <div class="card"><div class="label">✔ Verified kanallar</div><div class="num">${num(verifiedN)}</div></div>
+            <div class="card"><div class="label">🏅 Verified kutayotgan (1000+)</div><div class="num">${num(eligible.length)}</div></div>
+            <div class="card"><div class="label">⭐ Tavsiyadagi kanallar</div><div class="num">${num(boosted)}</div></div>
+            <div class="card"><div class="label">⬇ Cho‘ktirilganlar</div><div class="num">${num(demoted)}</div></div>
+            <div class="card"><div class="label">Jami videolar</div><div class="num">${num(videos.length)}</div></div>
+            <div class="card"><div class="label">Jami ko‘rishlar</div><div class="num">${num(views)}</div></div>
+            <div class="card"><div class="label">Jami like</div><div class="num">${num(likes)}</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
+            <div class="tablebox"><table style="min-width:0"><thead><tr><th colspan="2">Eng yangi foydalanuvchilar</th></tr></thead><tbody>
+              ${recent.map((u) => `<tr><td>${userCell(u)}</td><td>${statusBadge(u)}</td></tr>`).join("") || '<tr><td class="muted">Hali yo‘q</td></tr>'}
+            </tbody></table></div>
+            <div class="tablebox"><table style="min-width:0"><thead><tr><th colspan="2">🏅 1000+ obunachi · verified kutmoqda</th></tr></thead><tbody>
+              ${eligible.slice(0, 8).map((u) => `<tr><td>${userCell(u)}</td><td><button class="small primary" data-a="verify" data-id="${esc(u.id)}" data-v="1">✔ Verified berish</button></td></tr>`).join("") || '<tr><td class="muted">Hozircha yo‘q</td></tr>'}
+            </tbody></table></div>
+            <div class="tablebox"><table style="min-width:0"><thead><tr><th colspan="2">Eng ko‘p ko‘rilgan videolar</th></tr></thead><tbody>
+              ${topVideos.map((v) => `<tr><td>${esc(v.title)}<div class="muted">${esc(v.owner?.channelName || "")}</div></td><td>${num(v.views)} 👁</td></tr>`).join("") || '<tr><td class="muted">Hali yo‘q</td></tr>'}
+            </tbody></table></div>
+          </div>`;
+      }
+
+      function userCell(u) {
+        const name = u.channelName || u.username || "?";
+        return `<div class="user"><div class="avatar">${esc(name.charAt(0).toUpperCase())}</div><div><b>${esc(name)}</b>${u.verified ? VERIFIED : ""}${u.isAdmin ? ' <span class="badge" style="padding:1px 8px">admin</span>' : ""}${rankTag(u)}<div class="muted">@${esc(u.username)} · ${num(u.subscribers)} obunachi</div></div></div>`;
+      }
+      function statusBadge(u) {
+        if (u.banned) return '<span class="badge banned">⛔ Bloklangan</span>';
+        if (u.online) return '<span class="badge on"><span class="dot"></span>Online</span>';
+        return `<span class="badge"><span class="dot"></span>Offline</span><div class="muted" style="margin-top:4px">${ago(u.lastSeenAt)}</div>`;
+      }
+
+      function drawUsers() {
+        let list = users.filter((u) => {
+          if (filter === "online" && !u.online) return false;
+          if (filter === "offline" && u.online) return false;
+          if (filter === "banned" && !u.banned) return false;
+          if (filter === "verified" && !u.verified) return false;
+          if (filter === "eligible" && (u.subscribers || 0) < LIMIT) return false;
+          if (filter === "boost" && u.rank !== "boost") return false;
+          if (filter === "demote" && u.rank !== "demote") return false;
+          const hay = ((u.username || "") + " " + (u.channelName || "")).toLowerCase();
+          return hay.includes(query);
+        });
+        // online avval, keyin oxirgi faollik bo'yicha
+        list.sort((a, b) => (b.online ? 1 : 0) - (a.online ? 1 : 0) || new Date(b.lastSeenAt || 0) - new Date(a.lastSeenAt || 0));
+        const online = users.filter((u) => u.online).length;
+        $("#view").innerHTML = `
+          <p class="muted">Jami: <b>${users.length}</b> · Online: <b style="color:#3ddc84">${online}</b> · Offline: <b>${users.length - online}</b> · Ko‘rsatilmoqda: ${list.length}</p>
+          <div class="tablebox"><table>
+            <thead><tr><th>Foydalanuvchi</th><th>Holati</th><th>Videolar</th><th>Obunachilar</th><th>Ro‘yxatdan o‘tgan</th><th>Amallar</th></tr></thead>
+            <tbody>${
+              list.length
+                ? list.map((u) => `<tr>
+                    <td>${userCell(u)}</td>
+                    <td>${statusBadge(u)}</td>
+                    <td>${num(u.videoCount)}</td>
+                    <td>${num(u.subscribers)}</td>
+                    <td>${fmtDate(u.createdAt)}</td>
+                    <td>${
+                      u.isAdmin ? adminActions(u) : channelActions(u)
+                    }</td>
+                  </tr>`).join("")
+                : '<tr><td colspan="6"><div class="empty">Hech narsa topilmadi</div></td></tr>'
+            }</tbody>
+          </table></div>`;
+      }
+
+      function drawVideos() {
+        const list = videos.filter((v) => ((v.title || "") + " " + (v.owner?.channelName || "")).toLowerCase().includes(query));
+        $("#view").innerHTML = `
+          <p class="muted">Jami videolar: <b>${videos.length}</b> · Ko‘rsatilmoqda: ${list.length}</p>
+          <div class="tablebox"><table>
+            <thead><tr><th>Video</th><th>Kanal</th><th>Kategoriya</th><th>Ko‘rish</th><th>Like</th><th>Sana</th><th>Amallar</th></tr></thead>
+            <tbody>${
+              list.length
+                ? list.map((v) => `<tr>
+                    <td><b>${esc(v.title)}</b></td>
+                    <td>${esc(v.owner?.channelName || "—")}</td>
+                    <td>${esc(v.category || "—")}</td>
+                    <td>${num(v.views)}</td>
+                    <td>${num(v.likeCount)}</td>
+                    <td>${fmtDate(v.createdAt)}</td>
+                    <td><div class="actions">
+                      <a class="btn small" href="${esc(v.url)}" target="_blank" rel="noopener">▶ Ko‘rish</a>
+                      <button class="small danger" data-a="delvideo" data-id="${esc(v.id)}">O‘chirish</button>
+                    </div></td>
+                  </tr>`).join("")
+                : '<tr><td colspan="7"><div class="empty">Hech narsa topilmadi</div></td></tr>'
+            }</tbody>
+          </table></div>`;
+      }
+
+      async function onAction(e) {
+        const b = e.target.closest("[data-a]");
+        if (!b) return;
+        const id = b.dataset.id, a = b.dataset.a;
+        try {
+          if (a === "ban") {
+            await api("/users/" + encodeURIComponent(id) + "/ban", { method: "POST", body: JSON.stringify({ banned: b.dataset.b === "1" }) });
+            toast(b.dataset.b === "1" ? "Foydalanuvchi bloklandi" : "Blokdan chiqarildi");
+          } else if (a === "verify") {
+            const v = b.dataset.v === "1";
+            await api("/users/" + encodeURIComponent(id) + "/verify", { method: "POST", body: JSON.stringify({ verified: v }) });
+            toast(v ? "Kanalga verified badge berildi ✔" : "Verified badge olib tashlandi");
+          } else if (a === "rank") {
+            const r = b.dataset.r;
+            await api("/users/" + encodeURIComponent(id) + "/rank", { method: "POST", body: JSON.stringify({ rank: r }) });
+            toast(r === "boost" ? "Kanal tavsiyaga chiqarildi ⭐" : r === "demote" ? "Kanal cho‘ktirildi ⬇" : "Kanal oddiy holatga qaytarildi");
+          } else if (a === "deluser") {
+            if (!confirm("Foydalanuvchi va uning barcha videolari o‘chiriladi. Davom etasizmi?")) return;
+            await api("/users/" + encodeURIComponent(id), { method: "DELETE" });
+            toast("Foydalanuvchi o‘chirildi");
+          } else if (a === "delvideo") {
+            if (!confirm("Video o‘chirilsinmi?")) return;
+            await api("/videos/" + encodeURIComponent(id), { method: "DELETE" });
+            toast("Video o‘chirildi");
+          }
+          load();
+        } catch (err) {
+          toast(err.message);
+        }
+      }
+
+      load();
+      timer = setInterval(load, 10000); // har 10 soniyada avtomatik yangilanadi
+    </script>
+  </body>
+</html>
